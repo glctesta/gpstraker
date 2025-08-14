@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CentoPassi Tracker</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <button id="sidebar-toggle" class="sidebar-toggle-btn">☰</button>
+    <div id="map"></div>
+
+    <div id="sidebar">
+        <button id="sidebar-close-btn" class="sidebar-close-btn">&times;</button>
+        <h1>Race Tracker</h1>
+
+        <div id="menu">
+           <h3>Menu</h3>
+           <label for="gpx-file">Load GPX:</label>
+           <input type="file" id="gpx-file" accept=".gpx">
+       </div>
+
+       <div id="config">
+           <h3 class="collapsible-header">Options (mt)</h3>
+           <div class="collapsible-content">
+               <label for="dist-a">Farest (Red):</label>
+               <input type="number" id="dist-a" value="1500"><br>
+               <label for="dist-b">Middle (Yellow):</label>
+               <input type="number" id="dist-b" value="500"><br>
+               <label for="dist-c">Target (Green):</label>
+               <input type="number" id="dist-c" value="70">
+           </div>
+       </div>
+       
+        <div id="controls">
+            <button id="download-log-btn">Log</button>
+            <button id="wakelock-btn">Tieni Schermo Acceso</button>
+        </div>
+    </div>
+
+    <div id="bottom-bar">
+        <div id="stats">
+            <span>Loaded: <span id="wp-total">0</span></span>
+            <span>Achieved: <span id="wp-reached">0</span></span>
+            <span>To achieve: <span id="wp-remaining">0</span></span>
+            <span>Skipped: <span id="wp-skipped">0</span></span>
+            <span>GPS: <span id="gps-status">Initializing...</span></span>
+            <span id="wp-distance">Dist: --</span>
+        </div>
+    </div>
+    
+    <button id="skip-wp-btn" class="bottom-skip-btn">Skip</button>
+
+    <div id="wp-prompt" class="hidden">
+        <p id="prompt-message"></p>
+        <div id="prompt-timer"></div>
+        <div class="prompt-buttons">
+            <button id="prompt-yes">Sì</button>
+            <button id="prompt-no">No</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="gpx-parser.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>
