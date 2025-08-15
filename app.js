@@ -144,7 +144,6 @@ function resetState() {
     waypointMarkers = [];
 
     updateStatsUI();
-    // NUOVO: Resetta anche la distanza
     document.getElementById('wp-distance').textContent = 'Dist: --';
 }
 
@@ -155,7 +154,7 @@ function setCurrentWaypoint(index) {
         currentWaypointIndex = -1;
         circles.forEach(c => map.removeLayer(c));
         circles = [];
-        distanceEl.textContent = 'Dist: --'; // Resetta la distanza
+        distanceEl.textContent = 'Dist: --';
         return;
     }
 
@@ -164,18 +163,22 @@ function setCurrentWaypoint(index) {
 
     circles.forEach(c => map.removeLayer(c));
     circles = [];
+ // ==================================================================
+    // THIS CODE PREVENTS THE ERROR
+    // It ensures the distance values are always valid numbers.
+    // ==================================================================
+    const distA = parseFloat(document.getElementById('dist-a').value) || 0;
+    const distB = parseFloat(document.getElementById('dist-b').value) || 0;
+    const distC = parseFloat(document.getElementById('dist-c').value) || 0;
 
-    const distA = document.getElementById('dist-a').value;
-    const distB = document.getElementById('dist-b').value;
-    const distC = document.getElementById('dist-c').value;
-
+    // The application can now safely create circles with these values
     circles.push(L.circle([waypoint.lat, waypoint.lon], { radius: distA, color: 'red', fillOpacity: 0.1 }).addTo(map));
     circles.push(L.circle([waypoint.lat, waypoint.lon], { radius: distB, color: 'yellow', fillOpacity: 0.1 }).addTo(map));
     circles.push(L.circle([waypoint.lat, waypoint.lon], { radius: distC, color: 'green', fillOpacity: 0.2 }).addTo(map));
 
     map.flyTo([waypoint.lat, waypoint.lon], 15);
     promptedWaypointIndex = -1;
-    distanceEl.textContent = 'Dist: Calcolo...'; // Testo temporaneo
+    distanceEl.textContent = 'Dist: Calcolo...';
 }
 
 
@@ -197,7 +200,7 @@ function onSuccess(pos) {
     const { latitude, longitude } = pos.coords;
     const userLatLng = L.latLng(latitude, longitude);
     const gpsStatusEl = document.getElementById('gps-status');
-    const distanceEl = document.getElementById('wp-distance'); // Seleziona l'elemento della distanza
+    const distanceEl = document.getElementById('wp-distance');
 
     if (userMarker) {
         gpsStatusEl.textContent = 'Attivo';
@@ -209,20 +212,17 @@ function onSuccess(pos) {
     }
 
     if (currentWaypointIndex === -1) {
-        distanceEl.textContent = 'Dist: --'; // Assicurati che sia resettato se non ci sono WP
+        distanceEl.textContent = 'Dist: --';
         return;
     }
     
-    // Calcolo e aggiornamento distanza
     const targetWaypoint = allWaypoints[currentWaypointIndex];
     const targetLatLng = L.latLng(targetWaypoint.lat, targetWaypoint.lon);
     const distanceToTarget = userLatLng.distanceTo(targetLatLng);
     
-    // NUOVO: Aggiorna il testo della distanza
     distanceEl.textContent = `Dist: ${formatDistance(distanceToTarget)}`;
 
-    // Logica per raggiungere il WP
-    const arrivalDistance = document.getElementById('dist-c').value;
+    const arrivalDistance = parseFloat(document.getElementById('dist-c').value) || 0;
     if (distanceToTarget <= arrivalDistance) {
         markWaypointAsReached();
         return;
@@ -254,7 +254,6 @@ function markWaypointAsReached() {
     stats.remaining--;
     updateStatsUI();
 
-    // Trova il prossimo waypoint 'pending'
     const nextPendingIndex = allWaypoints.findIndex((wp, index) => index > currentWaypointIndex && wp.status === 'pending');
     setCurrentWaypoint(nextPendingIndex !== -1 ? nextPendingIndex : allWaypoints.length);
 }
@@ -281,7 +280,6 @@ function updateStatsUI() {
     document.getElementById('wp-skipped').textContent = stats.skipped;
 }
 
-// ... (downloadLog rimane invariato) ...
 function downloadLog() {
     if (reachedWaypointsLog.length === 0) {
         alert("Nessun waypoint raggiunto da scaricare.");
@@ -302,18 +300,13 @@ function downloadLog() {
 // WAKE LOCK, SWITCH INTELLIGENTE E FORMATTAZIONE
 // ---------------------------------------------------
 
-// NUOVO: Funzione per formattare la distanza
 function formatDistance(meters) {
     if (meters >= 1000) {
-        // Se è 1 km o più, mostra in km con due decimali
         return `${(meters / 1000).toFixed(2)} km`;
     }
-    // Altrimenti, mostra in metri senza decimali
     return `${Math.round(meters)} m`;
 }
 
-
-// ... (Tutto il resto del codice per Wake Lock e Switch intelligente rimane invariato) ...
 async function toggleWakeLock() {
     const button = document.getElementById('wakelock-btn');
     if (!('wakeLock' in navigator)) {
@@ -345,7 +338,7 @@ async function toggleWakeLock() {
 }
 
 function checkForNearbyWaypoints(userLatLng) {
-    const proximityThreshold = document.getElementById('dist-c').value;
+    const proximityThreshold = parseFloat(document.getElementById('dist-c').value) || 0;
     
     let closestFutureWp = { index: -1, distance: Infinity };
 
@@ -400,7 +393,6 @@ function handleSwitchResponse(shouldSwitch) {
 
         [allWaypoints[oldIndex], allWaypoints[newIndex]] = [allWaypoints[newIndex], allWaypoints[oldIndex]];
         
-        // Non è necessario ridisegnare i marker, basta aggiornare il target
         setCurrentWaypoint(oldIndex);
     }
 }
